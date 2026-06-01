@@ -105,6 +105,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://stableagony.github.io",
+        "https://stableagony.github.io/ai-enabled-stock-trading-bot",
+        "https://stableagony.github.io/ai-enabled-stock-trading-bot/",
         "http://localhost:5173",
         "http://localhost:4173",
     ],
