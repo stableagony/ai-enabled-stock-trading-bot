@@ -326,26 +326,34 @@ def get_tickers():
             
     return DEFAULT_TICKERS
 
-# ── Watchlist ────────────────────────────────────────────────────────────────
+# ── Watchlist (in-memory, optional disk persistence) ─────────────────────────
 WATCHLIST_FILE = os.path.join(BASE_DIR, "watchlist.json")
+_watchlist_cache: list = []
 
 def load_watchlist():
+    global _watchlist_cache
+    if _watchlist_cache:
+        return list(_watchlist_cache)
+    # Try loading from disk (works locally, may fail on cloud)
     if os.path.exists(WATCHLIST_FILE):
         try:
             with open(WATCHLIST_FILE, "r") as f:
                 wl = json.load(f)
-                if isinstance(wl, list) and len(wl) > 0:
-                    return wl
+                if isinstance(wl, list):
+                    _watchlist_cache = wl
+                    return list(wl)
         except Exception:
             pass
-    return ["RELIANCE", "TCS", "INFY"]
+    return []
 
 def save_watchlist(wl):
+    global _watchlist_cache
+    _watchlist_cache = list(wl)
     try:
         with open(WATCHLIST_FILE, "w") as f:
             json.dump(wl, f)
-    except Exception as e:
-        print(f"[WARN] Cannot write watchlist (read-only fs?): {e}")
+    except Exception:
+        pass  # cloud read-only filesystem — in-memory only
 
 @app.get("/api/watchlist")
 def get_watchlist():
