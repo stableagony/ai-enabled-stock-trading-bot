@@ -103,7 +103,12 @@ app = FastAPI(title="StonksAI Backend")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://stableagony.github.io",
+        "http://localhost:5173",
+        "http://localhost:4173",
+    ],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
