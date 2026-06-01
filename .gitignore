@@ -4,7 +4,9 @@
 # Python
 __pycache__/
 *.pyc
-*.pth
+# Ignore Python path config files in virtualenvs but NOT our model weights
+.venv/**/*.pth
+venv/**/*.pth
 
 # Node
 node_modules/
