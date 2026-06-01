@@ -1,0 +1,15 @@
+# Credentials
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pth
+
+# Node
+node_modules/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
