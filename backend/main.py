@@ -115,9 +115,15 @@ app.add_middleware(
 
 @app.on_event("startup")
 def startup():
-    load_model()
-    if init_kite():
-        load_instruments()
+    try:
+        load_model()
+    except Exception as e:
+        print(f"[WARN] Model load failed: {e}")
+    try:
+        if init_kite():
+            load_instruments()
+    except Exception as e:
+        print(f"[WARN] Kite init failed: {e}")
 
 # ── Pydantic schemas ─────────────────────────────────────────────────────────
 class CandlePoint(BaseModel):
@@ -160,13 +166,17 @@ def rolling_zscore(df: pd.DataFrame) -> pd.DataFrame:
 # ── Data Fetchers ─────────────────────────────────────────────────────────────
 def fetch_via_yfinance(ticker_key: str) -> pd.DataFrame:
     yf_sym = YF_SYMBOLS.get(ticker_key, ticker_key + ".NS")
-    raw = yf.download(yf_sym, period="5d", interval="1m", progress=False)
+    raw = yf.download(yf_sym, period="5d", interval="1m", progress=False, auto_adjust=True)
     if raw is None or len(raw) < SEQUENCE_LENGTH:
-        raise HTTPException(status_code=503, detail="Not enough data from yfinance.")
-    df = raw[['Open','High','Low','Close','Volume']].copy()
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = df.columns.droplevel(1)
-    df.columns = ['open','high','low','close','volume']
+        raise HTTPException(status_code=503, detail=f"Not enough data from yfinance for {yf_sym}.")
+    # Flatten MultiIndex columns if present (yfinance >= 0.2.x returns MultiIndex)
+    if isinstance(raw.columns, pd.MultiIndex):
+        raw.columns = raw.columns.get_level_values(0)
+    # Normalize column names to lowercase
+    raw.columns = [c.lower() for c in raw.columns]
+    needed = [c for c in ['open','high','low','close','volume'] if c in raw.columns]
+    df = raw[needed].copy()
+    df.columns = ['open','high','low','close','volume'][:len(needed)]
     return df.ffill().dropna()
 
 def fetch_via_kite(ticker_key: str) -> pd.DataFrame:
@@ -318,30 +328,22 @@ def get_tickers():
 WATCHLIST_FILE = os.path.join(BASE_DIR, "watchlist.json")
 
 def load_watchlist():
-    print(f"[DEBUG] WATCHLIST_FILE path is: {WATCHLIST_FILE}")
     if os.path.exists(WATCHLIST_FILE):
-        print(f"[DEBUG] WATCHLIST_FILE exists!")
         try:
             with open(WATCHLIST_FILE, "r") as f:
                 wl = json.load(f)
-                print(f"[DEBUG] WATCHLIST_FILE content: {wl}")
                 if isinstance(wl, list) and len(wl) > 0:
                     return wl
-        except Exception as e:
-            print(f"[DEBUG] Failed to load watchlist: {e}")
-    # Seed default watchlist
-    default_wl = ["RELIANCE", "TCS", "INFY"]
-    print(f"[DEBUG] Seeding default watchlist: {default_wl}")
-    try:
-        with open(WATCHLIST_FILE, "w") as f:
-            json.dump(default_wl, f)
-    except Exception as e:
-        print(f"[WARN] Failed to write default watchlist: {e}")
-    return default_wl
+        except Exception:
+            pass
+    return ["RELIANCE", "TCS", "INFY"]
 
 def save_watchlist(wl):
-    with open(WATCHLIST_FILE, "w") as f:
-        json.dump(wl, f)
+    try:
+        with open(WATCHLIST_FILE, "w") as f:
+            json.dump(wl, f)
+    except Exception as e:
+        print(f"[WARN] Cannot write watchlist (read-only fs?): {e}")
 
 @app.get("/api/watchlist")
 def get_watchlist():
