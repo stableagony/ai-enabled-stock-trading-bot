@@ -1,8 +1,9 @@
-fastapi==0.115.12
-uvicorn==0.34.3
-python-dotenv==1.1.0
-numpy==2.2.6
-pandas==2.3.0
-yfinance==0.2.62
-torch==2.7.0
-kiteconnect==5.0.1
+fastapi
+uvicorn[standard]
+python-dotenv
+numpy
+pandas
+yfinance
+kiteconnect
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
