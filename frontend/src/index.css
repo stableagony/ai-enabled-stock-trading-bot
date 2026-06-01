@@ -1,0 +1,814 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ── Design Tokens ─────────────────────────────────────────────────────────── */
+:root {
+  --bg-base:       #080c14;
+  --bg-surface:    #0e1420;
+  --bg-card:       #111827;
+  --bg-glass:      rgba(17, 24, 39, 0.6);
+  --border:        rgba(255,255,255,0.06);
+  --border-glow:   rgba(99,102,241,0.4);
+
+  --accent:        #6366f1;
+  --accent-bright: #818cf8;
+  --green:         #10b981;
+  --green-glow:    rgba(16,185,129,0.25);
+  --red:           #ef4444;
+  --red-glow:      rgba(239,68,68,0.25);
+  --amber:         #f59e0b;
+  --amber-glow:    rgba(245,158,11,0.25);
+
+  --text-primary:  #f0f4ff;
+  --text-secondary:#94a3b8;
+  --text-muted:    #475569;
+
+  --radius-sm:  8px;
+  --radius-md:  12px;
+  --radius-lg:  20px;
+  --radius-xl:  28px;
+
+  --shadow-glow: 0 0 40px rgba(99,102,241,0.12);
+  --transition:  all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── Reset ─────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* animated grid background */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(99,102,241,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99,102,241,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+#root { position: relative; z-index: 1; }
+
+/* ── Typography ─────────────────────────────────────────────────────────────── */
+h1 { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: 1.25rem; font-weight: 700; }
+h3 { font-size: 1rem;    font-weight: 600; }
+
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+/* ── Layout ─────────────────────────────────────────────────────────────────── */
+.app-shell {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px 48px;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 0 28px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 32px;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-logo {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  border-radius: var(--radius-sm);
+  display: grid; place-items: center;
+  font-size: 1.2rem;
+  box-shadow: 0 0 24px rgba(99,102,241,0.5);
+}
+
+.header-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.status-dot {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.8rem; color: var(--text-secondary);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 8px 16px;
+  border-radius: 100px;
+}
+
+.status-dot::before {
+  content: '';
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.6; transform: scale(0.85); }
+}
+
+/* ── Ticker selector bar ─────────────────────────────────────────────────────── */
+.ticker-bar {
+  display: flex; gap: 10px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.ticker-btn {
+  padding: 9px 20px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.85rem; font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: 'Inter', sans-serif;
+}
+
+.ticker-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent-bright);
+  background: rgba(99,102,241,0.08);
+}
+
+.ticker-btn.active {
+  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 0 20px rgba(99,102,241,0.4);
+}
+
+/* ── Grid layout ─────────────────────────────────────────────────────────────── */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  grid-template-rows: auto auto;
+  gap: 20px;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Glass Card ─────────────────────────────────────────────────────────────── */
+.glass-card {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+}
+
+.glass-card:hover {
+  border-color: var(--border-glow);
+  box-shadow: var(--shadow-glow);
+}
+
+/* ── Price Hero ─────────────────────────────────────────────────────────────── */
+.price-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.price-label {
+  font-size: 0.75rem; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.1em; font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.price-value {
+  font-size: 2.5rem; font-weight: 800;
+  letter-spacing: -0.03em;
+  font-family: 'JetBrains Mono', monospace;
+  background: linear-gradient(135deg, #f0f4ff, var(--accent-bright));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.price-currency {
+  font-size: 1.2rem; font-weight: 500;
+  color: var(--text-secondary);
+  -webkit-text-fill-color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+/* ── Chart area ─────────────────────────────────────────────────────────────── */
+.chart-container {
+  width: 100%; height: 320px;
+}
+
+.chart-card { grid-column: 1; }
+.prediction-col { grid-column: 2; grid-row: 1 / 3; display: flex; flex-direction: column; gap: 20px; }
+
+@media (max-width: 1024px) {
+  .chart-card, .prediction-col { grid-column: 1; }
+}
+
+/* ── Prediction Panel ─────────────────────────────────────────────────────────── */
+.prediction-panel {
+  display: flex; flex-direction: column; gap: 20px;
+}
+
+.signal-badge {
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px;
+  padding: 20px;
+  border-radius: var(--radius-md);
+  font-size: 1.6rem; font-weight: 800;
+  letter-spacing: 0.06em;
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.signal-badge::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: inherit;
+  filter: blur(20px) opacity(0.3);
+  z-index: -1;
+}
+
+.signal-badge.BUY  { background: var(--green-glow); color: var(--green);  border: 1px solid rgba(16,185,129,0.3); }
+.signal-badge.SELL { background: var(--red-glow);   color: var(--red);    border: 1px solid rgba(239,68,68,0.3); }
+.signal-badge.HOLD { background: var(--amber-glow); color: var(--amber);  border: 1px solid rgba(245,158,11,0.3); }
+
+.confidence-bar-wrap {
+  display: flex; flex-direction: column; gap: 8px;
+}
+
+.confidence-label {
+  display: flex; justify-content: space-between;
+  font-size: 0.8rem; color: var(--text-secondary); font-weight: 500;
+}
+
+.confidence-track {
+  height: 8px; border-radius: 100px;
+  background: var(--bg-base);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.confidence-fill {
+  height: 100%; border-radius: 100px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.confidence-fill.BUY  { background: linear-gradient(90deg, #059669, var(--green)); }
+.confidence-fill.SELL { background: linear-gradient(90deg, #dc2626, var(--red)); }
+.confidence-fill.HOLD { background: linear-gradient(90deg, #d97706, var(--amber)); }
+
+/* ── Stats row ─────────────────────────────────────────────────────────────── */
+.stats-row {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  grid-column: 1;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  transition: var(--transition);
+}
+
+.stat-card:hover {
+  border-color: var(--border-glow);
+  transform: translateY(-2px);
+}
+
+.stat-label {
+  font-size: 0.72rem; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.stat-value {
+  font-size: 1.3rem; font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Trade Log ─────────────────────────────────────────────────────────────── */
+.trade-log { grid-column: 1; }
+
+.log-list {
+  display: flex; flex-direction: column; gap: 8px;
+  max-height: 220px; overflow-y: auto;
+  padding-right: 4px;
+}
+
+.log-list::-webkit-scrollbar { width: 4px; }
+.log-list::-webkit-scrollbar-track { background: transparent; }
+.log-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 100px; }
+
+.log-item {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.log-signal {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;
+  padding: 2px 8px; border-radius: 100px;
+}
+
+.log-signal.BUY  { background: var(--green-glow);  color: var(--green); }
+.log-signal.SELL { background: var(--red-glow);    color: var(--red);   }
+.log-signal.HOLD { background: var(--amber-glow);  color: var(--amber); }
+
+.log-price { font-family: 'JetBrains Mono', monospace; color: var(--text-primary); font-weight: 500; }
+.log-time  { color: var(--text-muted); margin-left: auto; }
+
+/* ── Loading / Error states ─────────────────────────────────────────────────── */
+.loading-overlay {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 16px; padding: 60px;
+  color: var(--text-secondary);
+}
+
+.spinner {
+  width: 42px; height: 42px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-box {
+  background: var(--red-glow); border: 1px solid rgba(239,68,68,0.3);
+  border-radius: var(--radius-md); padding: 16px 20px;
+  color: var(--red); font-size: 0.85rem;
+}
+
+/* ── Refresh button ─────────────────────────────────────────────────────────── */
+.btn-refresh {
+  display: flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  color: #fff; border: none; border-radius: var(--radius-sm);
+  padding: 10px 20px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; transition: var(--transition);
+  font-family: 'Inter', sans-serif;
+}
+
+.btn-refresh:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(99,102,241,0.4);
+}
+
+.btn-refresh:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.card-title {
+  font-size: 0.75rem; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;
+}
+
+.no-data {
+  color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 24px 0;
+}
+
+/* ── Auto Trading Mode ─────────────────────────────────────────────────────── */
+.btn-auto {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 22px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.85rem; font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: 'Inter', sans-serif;
+}
+
+.btn-auto:hover {
+  border-color: var(--green);
+  color: var(--green);
+  background: rgba(16,185,129,0.06);
+}
+
+.btn-auto.active {
+  background: linear-gradient(135deg, #059669, var(--green));
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 0 24px rgba(16,185,129,0.4);
+  animation: autoGlow 2s ease infinite;
+}
+
+@keyframes autoGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(16,185,129,0.3); }
+  50%       { box-shadow: 0 0 32px rgba(16,185,129,0.6); }
+}
+
+/* ── Auto Banner ─────────────────────────────────────────────────────────────── */
+.auto-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  background: rgba(16,185,129,0.06);
+  border: 1px solid rgba(16,185,129,0.2);
+  border-radius: var(--radius-md);
+  padding: 14px 24px;
+  margin-bottom: 24px;
+  animation: bannerSlideIn 0.4s ease;
+}
+
+@keyframes bannerSlideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.auto-banner-left {
+  display: flex; align-items: center; gap: 12px;
+}
+
+.auto-pulse {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 10px var(--green);
+  animation: pulse 1.5s infinite;
+}
+
+.auto-label {
+  font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--green);
+}
+
+.auto-countdown {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  padding: 4px 12px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+}
+
+.auto-banner-stats {
+  display: flex; gap: 24px;
+}
+
+.auto-stat {
+  display: flex; flex-direction: column; gap: 2px;
+}
+
+.auto-stat-label {
+  font-size: 0.65rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.auto-stat-value {
+  font-size: 0.9rem; font-weight: 700;
+}
+
+/* ── Disabled ticker during auto ─────────────────────────────────────────────── */
+.ticker-btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── ENTER/EXIT signals in trade log ─────────────────────────────────────────── */
+.log-signal.ENTER { background: var(--green-glow); color: var(--green); }
+.log-signal.EXIT  { background: var(--red-glow);   color: var(--red);   }
+
+/* ── Zerodha Login Button ────────────────────────────────────────────────────── */
+.btn-zerodha {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid #e66000;
+  background: rgba(230,96,0,0.1);
+  color: #ff7b1c;
+  font-size: 0.8rem; font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: 'Inter', sans-serif;
+  text-decoration: none;
+}
+
+.btn-zerodha:hover {
+  background: rgba(230,96,0,0.2);
+  box-shadow: 0 0 20px rgba(230,96,0,0.3);
+  transform: translateY(-1px);
+}
+
+/* ── Setup Page ──────────────────────────────────────────────────────────────── */
+.setup-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.setup-card {
+  width: 100%;
+  max-width: 500px;
+  padding: 32px;
+}
+
+.setup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.source-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.source-option {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: rgba(255,255,255,0.02);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.source-option:hover {
+  border-color: rgba(99,102,241,0.5);
+  background: rgba(99,102,241,0.05);
+}
+
+.source-option.active {
+  border-color: var(--accent);
+  background: rgba(99,102,241,0.1);
+  box-shadow: 0 0 20px rgba(99,102,241,0.1);
+}
+
+.source-option input[type="radio"] {
+  margin-top: 4px;
+  accent-color: var(--accent);
+}
+
+.source-content strong {
+  display: block;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+}
+
+.source-content p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.kite-creds {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  background: rgba(0,0,0,0.2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.slide-down {
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-group label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.input-group input {
+  padding: 10px 14px;
+  background: var(--bg-base);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  transition: var(--transition);
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(99,102,241,0.2);
+}
+
+.btn-setup-submit {
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-top: 8px;
+}
+
+.btn-setup-submit:hover:not(:disabled) {
+  box-shadow: 0 8px 24px rgba(99,102,241,0.4);
+  transform: translateY(-2px);
+}
+
+.btn-setup-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-settings {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: var(--transition);
+}
+
+.btn-settings:hover {
+  background: var(--bg-card);
+  border-color: var(--text-secondary);
+  transform: rotate(45deg);
+}
+
+.btn-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  line-height: 1;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: var(--transition);
+}
+
+.btn-close:hover {
+  background: rgba(255,255,255,0.05);
+  color: var(--text-primary);
+}
+
+/* ── Watchlist UI ────────────────────────────────────────────────────────────── */
+.ticker-bar-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.ticker-btn-group {
+  position: relative;
+  display: flex;
+}
+
+.ticker-remove-btn {
+  background: rgba(255,50,50,0.1);
+  border: 1px solid rgba(255,50,50,0.2);
+  color: #ff5555;
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  padding: 0 8px;
+  cursor: pointer;
+  transition: var(--transition);
+  font-weight: bold;
+}
+
+.ticker-btn-group .ticker-btn {
+  border-radius: 8px 0 0 8px;
+}
+
+.ticker-remove-btn:hover:not(:disabled) {
+  background: rgba(255,50,50,0.3);
+  color: #fff;
+}
+
+.add-ticker-form {
+  display: flex;
+  height: 38px;
+}
+
+.add-ticker-form input {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-right: none;
+  border-radius: 8px 0 0 8px;
+  padding: 0 12px;
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  width: 140px;
+  transition: var(--transition);
+}
+
+.add-ticker-form input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(99,102,241,0.05);
+}
+
+.add-ticker-form button {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0 8px 8px 0;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0 12px;
+  font-weight: bold;
+  transition: var(--transition);
+}
+
+.add-ticker-form button:hover:not(:disabled) {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.add-ticker-form button:disabled, .add-ticker-form input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
