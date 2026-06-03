@@ -169,18 +169,46 @@ def rolling_zscore(df: pd.DataFrame) -> pd.DataFrame:
 # ── Data Fetchers ─────────────────────────────────────────────────────────────
 def fetch_via_yfinance(ticker_key: str) -> pd.DataFrame:
     yf_sym = YF_SYMBOLS.get(ticker_key, ticker_key + ".NS")
-    raw = yf.download(yf_sym, period="5d", interval="1m", progress=False, auto_adjust=True)
-    if raw is None or len(raw) < SEQUENCE_LENGTH:
-        raise HTTPException(status_code=503, detail=f"Not enough data from yfinance for {yf_sym}.")
-    # Flatten MultiIndex columns if present (yfinance >= 0.2.x returns MultiIndex)
-    if isinstance(raw.columns, pd.MultiIndex):
-        raw.columns = raw.columns.get_level_values(0)
-    # Normalize column names to lowercase
-    raw.columns = [c.lower() for c in raw.columns]
-    needed = [c for c in ['open','high','low','close','volume'] if c in raw.columns]
-    df = raw[needed].copy()
-    df.columns = ['open','high','low','close','volume'][:len(needed)]
-    return df.ffill().dropna()
+
+    def _fetch(period, interval):
+        try:
+            ticker = yf.Ticker(yf_sym)
+            raw = ticker.history(period=period, interval=interval)
+            if raw is None or len(raw) == 0:
+                return None
+            # Normalize column names to lowercase
+            raw.columns = [c.lower() for c in raw.columns]
+            needed = [c for c in ['open','high','low','close','volume'] if c in raw.columns]
+            if len(needed) < 4:
+                return None
+            df = raw[needed].copy()
+            df.columns = ['open','high','low','close','volume'][:len(needed)]
+            df = df.ffill().dropna()
+            print(f"[INFO] {yf_sym} {interval}/{period}: {len(df)} rows")
+            return df if len(df) >= SEQUENCE_LENGTH else None
+        except Exception as e:
+            print(f"[WARN] yfinance fetch failed ({yf_sym} {interval}/{period}): {e}")
+            return None
+
+    # Try 1-minute candles over 8 days (captures weekends/holidays)
+    df = _fetch("8d", "1m")
+    if df is not None:
+        return df
+
+    # Fallback: hourly candles over 60 days
+    df = _fetch("60d", "1h")
+    if df is not None:
+        return df
+
+    # Last resort: daily candles over 1 year
+    df = _fetch("1y", "1d")
+    if df is not None:
+        return df
+
+    raise HTTPException(
+        status_code=503,
+        detail=f"Could not fetch data for {yf_sym}. Check the symbol or try again later."
+    )
 
 def fetch_via_kite(ticker_key: str) -> pd.DataFrame:
     if not kite or not kite.access_token:
