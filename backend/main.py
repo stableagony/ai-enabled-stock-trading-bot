@@ -236,8 +236,11 @@ def kite_callback(request_token: str = Query(...)):
     """Handle Zerodha OAuth callback and generate access token."""
     global kite, DATA_SOURCE
     if not kite:
-        from kiteconnect import KiteConnect
-        kite = KiteConnect(api_key=KITE_API_KEY)
+        try:
+            from kiteconnect import KiteConnect
+            kite = KiteConnect(api_key=KITE_API_KEY)
+        except ImportError:
+            raise HTTPException(status_code=500, detail="kiteconnect package not installed on server. Add it to requirements.txt.")
     
     try:
         session = kite.generate_session(request_token, api_secret=KITE_API_SECRET)
