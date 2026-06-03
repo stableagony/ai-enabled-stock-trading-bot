@@ -20,10 +20,11 @@ warnings.filterwarnings('ignore')
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-KITE_API_KEY = os.getenv("KITE_API_KEY", "")
+KITE_API_KEY    = os.getenv("KITE_API_KEY", "")
 KITE_API_SECRET = os.getenv("KITE_API_SECRET", "")
 KITE_ACCESS_TOKEN = os.getenv("KITE_ACCESS_TOKEN", "")
-DATA_SOURCE = os.getenv("DATA_SOURCE", "yfinance")  # "kite" or "yfinance"
+DATA_SOURCE     = os.getenv("DATA_SOURCE", "yfinance")
+FRONTEND_URL    = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
 # ── Kite Connect (optional) ─────────────────────────────────────────────────
 kite = None
@@ -260,8 +261,8 @@ def kite_callback(request_token: str = Query(...)):
         DATA_SOURCE = "kite"
         load_instruments()
         
-        # Redirect back to frontend dashboard
-        return RedirectResponse(url="http://localhost:5173?login=success")
+        # Redirect back to frontend dashboard (works for both local and production)
+        return RedirectResponse(url=f"{FRONTEND_URL}?login=success")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Login failed: {str(e)}")
 

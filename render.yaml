@@ -9,6 +9,8 @@ services:
     envVars:
       - key: DATA_SOURCE
         value: yfinance
+      - key: FRONTEND_URL
+        value: https://stableagony.github.io/ai-enabled-stock-trading-bot
       - key: KITE_API_KEY
         sync: false
       - key: KITE_API_SECRET
