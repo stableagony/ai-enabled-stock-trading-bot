@@ -24,7 +24,13 @@ KITE_API_KEY    = os.getenv("KITE_API_KEY", "")
 KITE_API_SECRET = os.getenv("KITE_API_SECRET", "")
 KITE_ACCESS_TOKEN = os.getenv("KITE_ACCESS_TOKEN", "")
 DATA_SOURCE     = os.getenv("DATA_SOURCE", "yfinance")
-FRONTEND_URL    = os.getenv("FRONTEND_URL", "http://localhost:5173")
+# FRONTEND_URL: auto-detect production vs local dev
+_env_file = os.path.join(BASE_DIR, ".env")
+_default_frontend = (
+    "http://localhost:5173" if os.path.exists(_env_file)
+    else "https://stableagony.github.io/ai-enabled-stock-trading-bot"
+)
+FRONTEND_URL = os.getenv("FRONTEND_URL", _default_frontend)
 
 # ── Kite Connect (optional) ─────────────────────────────────────────────────
 kite = None
