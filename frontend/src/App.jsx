@@ -237,33 +237,50 @@ export default function App() {
   const countdownRef = useRef(null)
   const autoModeRef  = useRef(false)
 
-  // Check Kite status on mount
+  // Check Kite status on mount (also handles ?login=success redirect from Zerodha)
   useEffect(() => {
-    axios.get(`${API}/api/status`)
-      .then(r => {
-        setKiteStatus(r.data)
-        if (r.data.is_configured) {
+    const params = new URLSearchParams(window.location.search)
+    const justLoggedIn = params.get('login') === 'success'
+
+    // Clean the URL without reloading
+    if (justLoggedIn) {
+      window.history.replaceState({}, '', window.location.pathname)
+    }
+
+    const fetchStatus = () =>
+      axios.get(`${API}/api/status`)
+        .then(r => {
+          setKiteStatus(r.data)
           setView('dashboard')
-        } else {
-          setView('setup')
-        }
-      })
-      .catch(() => {
-        setView('dashboard') // fallback
-      })
-      
-    // Fetch dynamic tickers list
-    axios.get(`${API}/api/tickers`)
-      .then(r => {
-        setTickers(r.data)
-        if (r.data.length > 0) setActiveTicker(r.data[0])
-      })
-      .catch(console.error)
-      
-    // Fetch watchlist
-    axios.get(`${API}/api/watchlist`)
-      .then(r => setWatchlist(r.data))
-      .catch(console.error)
+        })
+        .catch(() => setView('dashboard'))
+
+    const fetchTickers = () =>
+      axios.get(`${API}/api/tickers`)
+        .then(r => {
+          setTickers(r.data)
+          if (r.data.length > 0) setActiveTicker(r.data[0])
+        })
+        .catch(console.error)
+
+    const fetchWatchlist = () =>
+      axios.get(`${API}/api/watchlist`)
+        .then(r => setWatchlist(r.data))
+        .catch(console.error)
+
+    fetchStatus()
+    fetchTickers()
+    fetchWatchlist()
+
+    // If came back from Zerodha login, show a success message
+    if (justLoggedIn) {
+      setTimeout(() => {
+        setError(null)
+        // Re-fetch tickers now that Kite is authenticated
+        fetchTickers()
+        fetchStatus()
+      }, 1500)
+    }
   }, [])
 
   const handleAddWatchlist = async (e) => {
